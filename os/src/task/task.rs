@@ -1,18 +1,47 @@
 //! Types related to task management
 
-use crate::config::MAX_SYSCALL_NUM;
+use alloc::collections::BTreeMap;
+
 use super::TaskContext;
 
 /// The task control block (TCB) of a task.
-#[derive(Copy, Clone)]
+#[derive(Clone)]
 pub struct TaskControlBlock {
-    pub task_info: TaskInfo,
     /// The task status in it's lifecycle
     pub task_status: TaskStatus,
     /// The task context
     pub task_cx: TaskContext,
-    /// The task Start time(ms)
-    pub task_start_time: usize
+    /// task info block
+    pub task_info: TaskInfoBlock
+}
+
+#[derive(Clone)]
+pub struct TaskInfoBlock {
+    /// Whether the task has already been dispatched
+    pub dispatched: bool,
+    /// Timestamp in ms of the first time this task being dispatched
+    pub dispatched_time: usize,
+    /// Syscall times
+    pub syscall_times: BTreeMap<usize, u32>
+    // pub syscall_times: [u32; MAX_SYSCALL_NUM] // will take too much more space than needed
+}
+
+impl TaskInfoBlock {
+    /// empty info block
+    pub fn new() -> Self {
+        TaskInfoBlock {
+            dispatched: false,
+            dispatched_time: 0,
+            syscall_times: BTreeMap::new()
+        }
+    }
+    /// Set the timestamp to now if it's the first to be dispatched
+    pub fn set_timestamp_if_first_dispatched(&mut self) {
+        if !self.dispatched {
+            self.dispatched_time = crate::timer::get_time_ms();
+            self.dispatched = true;
+        }
+    }
 }
 
 /// The status of a task
@@ -26,43 +55,4 @@ pub enum TaskStatus {
     Running,
     /// exited
     Exited,
-}
-
-/// Task information
-#[allow(dead_code)]
-#[derive(Copy, Clone)]
-pub struct TaskInfo {
-    /// Task status in it's life cycle
-    status: TaskStatus,
-    /// The numbers of syscall called by task
-    syscall_times: [u32; MAX_SYSCALL_NUM],
-    /// Total running time of task
-    time: usize,
-}
-
-impl TaskInfo {
-    pub fn new(status: TaskStatus) -> Self {
-        // Initialize syscall_times with zeros.
-        let syscall_times = [0; MAX_SYSCALL_NUM];
-        // Assuming TaskStatus::Running is a reasonable default.
-        TaskInfo {
-            status,
-            syscall_times,
-            time: 0,
-        }
-    }
-
-    pub fn set_status(&mut self, status: TaskStatus) {
-        self.status = status;
-    }
-
-    pub fn add_syscall_time(&mut self, index: usize) {
-        if index < MAX_SYSCALL_NUM {
-            self.syscall_times[index] += 1;
-        }
-    }
-
-    pub fn increment_time(&mut self, increment: usize) {
-        self.time = increment;
-    }
 }
