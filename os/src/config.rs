@@ -1,4 +1,4 @@
-//! Constants in the kernel
+//! Constants( Type Const) in the kernel
 
 #[allow(unused)]
 

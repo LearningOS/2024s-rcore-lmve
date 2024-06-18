@@ -1,3 +1,19 @@
+# ch3 系统调用
+  - 原型为 fn sys_task_info (ti：*mut TaskInfo) -> usize{}
+  - syscall ID: 410
+  - 函数功能：查询当前正在执行的任务信息，包括任务状态、使用系统调用的次数、离第一次被调度的时间
+  - 参数：ti 为待查寻任务
+  - 返回值：成功返回0，失败返回-1
+
+# 实验过程
+ 添加系统调用号在 src/syscall/mod.rs 中，添加了 SYS_TASK_INFO = 410 在 match 中添加相应的匹配项。
+ 添加 sys_task_info 函数，在 src/syscall/syscall.rs 中。
+ 添加 TaskInfo 结构体，在 src/task/mod.rs 中。
+ TaskInfoBlock类型保存任务第一次被调度的时刻和syscall总次数，在TCB中增加一个对应字段。
+ 使用BTreeMap<usize, u32>保存syscall次数，利用了原有的heap allocator
+ 在syscall分派之前更新，所以sys_task_info得到的也包含本次syscall
+ 在__switch之前检查下一个任务是否第一次被调度，如果是则将当前时刻记录进TIB
+
 
 
 

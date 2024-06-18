@@ -10,6 +10,12 @@
 //! `sys_` then the name of the syscall. You can find functions like this in
 //! submodules, and you should also implement syscalls this way.
 
+
+/* 
+ * inplement syscalls by add syscall nr in `syscall_id`
+ * first stape is to add syscall number
+ */
+
 /// write syscall
 const SYSCALL_WRITE: usize = 64;
 /// exit syscall
