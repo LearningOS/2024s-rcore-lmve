@@ -1,11 +1,15 @@
 //! Implementation of physical and virtual address and page number.
+//! See [`VirtAddr`] and [`PhysAddr`].
+//! 
+//! changed at 6/18/2024
+//! 
 use super::PageTableEntry;
 use crate::config::{PAGE_SIZE, PAGE_SIZE_BITS};
 use core::fmt::{self, Debug, Formatter};
 /// physical address
-const PA_WIDTH_SV39: usize = 56;
-const VA_WIDTH_SV39: usize = 39;
-const PPN_WIDTH_SV39: usize = PA_WIDTH_SV39 - PAGE_SIZE_BITS;
+const PA_WIDTH_SV39: usize = 56;   /* 56 bits physical address */
+const VA_WIDTH_SV39: usize = 39;   /* 39 bits virtual address */
+const PPN_WIDTH_SV39: usize = PA_WIDTH_SV39 - PAGE_SIZE_BITS; /* pagesizebits is the index of the page */
 const VPN_WIDTH_SV39: usize = VA_WIDTH_SV39 - PAGE_SIZE_BITS;
 
 /// physical address

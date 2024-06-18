@@ -4,10 +4,12 @@ use super::{frame_alloc, FrameTracker, PhysPageNum, StepByOne, VirtAddr, VirtPag
 use alloc::vec;
 use alloc::vec::Vec;
 use bitflags::*;
-
+/*
+ * flags for page
+ */
 bitflags! {
     /// page table entry flags
-    pub struct PTEFlags: u8 {
+    pub struct PTEFlags: u8 {  /* 低 8 bits*/
         const V = 1 << 0;
         const R = 1 << 1;
         const W = 1 << 2;

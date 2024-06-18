@@ -65,6 +65,14 @@ impl FrameAllocator for StackFrameAllocator {
             recycled: Vec::new(),
         }
     }
+    /*
+     * 在分配 alloc 的时候，首先会检查栈 recycled 内有没有之前回收的物理页号，如果有的话直接弹出栈顶并返回； 
+     * 否则的话我们只能从之前从未分配过的物理页号区间上进行分配，我们分配它的 左端点 current ，
+     * 同时将管理器内部维护的 current 加一代表 current 此前已经被分配过了。
+     * 在即将返回 的时候，我们使用 into 方法将 usize 转换成了物理页号 PhysPageNum 。
+     * 注意极端情况下可能出现内存耗尽分配失败的情况：即 recycled 为空且。 
+     * 为了涵盖这种情况， alloc 的返回值被 Option 包裹，我们返回 None 即可。
+     */
     fn alloc(&mut self) -> Option<PhysPageNum> {
         if let Some(ppn) = self.recycled.pop() {
             Some(ppn.into())
@@ -75,11 +83,19 @@ impl FrameAllocator for StackFrameAllocator {
             Some((self.current - 1).into())
         }
     }
+    /*
+     * 在回收 dealloc 的时候，我们需要检查回收页面的合法性，然后将其压入 recycled 栈中。回收页面合法有两个 条件：
+     * 1. 该页面之前一定被分配出去过，因此它的物理页号一定；
+     * 2. 该页面没有正处在回收状态，即它的物理页号不能在栈 recycled 中找到。
+     * 我们通过 recycled.iter() 获取栈上内容的迭代器，然后通过迭代器的 find 方法试图 寻找一个与输入物理页号相同的元素。
+     * 其返回值是一个 Option ，如果找到了就会是一个 Option::Some ， 这种情况说明我们内核其他部分实现有误，直接报错退出。
+     */
     fn dealloc(&mut self, ppn: PhysPageNum) {
         let ppn = ppn.0;
         // validity check
         if ppn >= self.current || self.recycled.iter().any(|&v| v == ppn) {
             panic!("Frame ppn={:#x} has not been allocated!", ppn);
+            /* before recycled , the is aready in recycle stack ,just panic! */
         }
         // recycle
         self.recycled.push(ppn);
