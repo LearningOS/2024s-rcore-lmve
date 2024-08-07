@@ -14,6 +14,28 @@
  在syscall分派之前更新，所以sys_task_info得到的也包含本次syscall
  在__switch之前检查下一个任务是否第一次被调度，如果是则将当前时刻记录进TIB
 
+# 数据结构
+struct TaskInfo {
+  id: usize,
+  status: TaskStatus,
+  call: [SyscallInfo; MAX_SYSCALL_NUM],
+  time: usize
+}
+
+struct SyscallInfo {
+  id: usize,
+  times: usize
+}
+1. syscall times
+  在每次进入 trap_handler 进入具体 syscall 之前更新syscall次数
+  在 task 创建时初始化 syscall times
+  相关数据结构及其方法在 src/syscall/mod.rs task.rs 中
+
+2. finish syscall sys_task_info()
+  在 syscall 中完成相关的处理逻辑
+
+
+
 
 
 
