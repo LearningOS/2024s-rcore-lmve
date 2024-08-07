@@ -91,3 +91,4 @@ pub fn rust_main() -> ! {
     batch::init();
     batch::run_next_app();
 }
+ 
