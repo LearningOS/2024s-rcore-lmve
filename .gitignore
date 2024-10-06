@@ -16,5 +16,5 @@ tools/
 pushall.sh
 *.bak
 
-ci-user/*
-ci-user
+/user
+/ci-user
